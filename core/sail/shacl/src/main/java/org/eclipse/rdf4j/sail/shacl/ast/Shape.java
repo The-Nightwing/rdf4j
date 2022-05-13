@@ -111,7 +111,7 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 	}
 
 	public void populate(ShaclProperties properties, ShapeSource shapeSource,
-			Cache cache, ShaclSail shaclSail) {
+			Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
 		this.deactivated = properties.isDeactivated();
 		this.message = properties.getMessage();
 		this.id = properties.getId();
@@ -199,20 +199,20 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 	}
 
 	List<ConstraintComponent> getConstraintComponents(ShaclProperties properties, ShapeSource shapeSource,
-			Cache cache, ShaclSail shaclSail) {
+			Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
 
 		List<ConstraintComponent> constraintComponent = new ArrayList<>();
 
 		properties.getProperty()
 				.stream()
 				.map(r -> new ShaclProperties(r, shapeSource))
-				.map(p -> PropertyShape.getInstance(p, shapeSource, cache, shaclSail))
+				.map(p -> PropertyShape.getInstance(p, shapeSource, cache, shaclSail, produceValidationReports))
 				.forEach(constraintComponent::add);
 
 		properties.getNode()
 				.stream()
 				.map(r -> new ShaclProperties(r, shapeSource))
-				.map(p -> NodeShape.getInstance(p, shapeSource, cache, true, shaclSail))
+				.map(p -> NodeShape.getInstance(p, shapeSource, cache, shaclSail, produceValidationReports))
 				.forEach(constraintComponent::add);
 
 		if (properties.getMinCount() != null) {
@@ -544,9 +544,9 @@ abstract public class Shape implements ConstraintComponent, Identifiable, Export
 						.map(r -> new ShaclProperties(r, shapeSourceWithContext))
 						.map(p -> {
 							if (p.getType() == SHACL.NODE_SHAPE) {
-								return NodeShape.getInstance(p, shapeSourceWithContext, cache, true, shaclSail);
+								return NodeShape.getInstance(p, shapeSourceWithContext, cache, shaclSail, true);
 							} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-								return PropertyShape.getInstance(p, shapeSourceWithContext, cache, shaclSail);
+								return PropertyShape.getInstance(p, shapeSourceWithContext, cache, shaclSail, true);
 							}
 							throw new IllegalStateException("Unknown shape type for " + p.getId());
 						})

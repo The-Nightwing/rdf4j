@@ -47,9 +47,9 @@ public class RSXTargetShape extends Target {
 		ShaclProperties p = new ShaclProperties(targetShape, shapeSource);
 
 		if (p.getType() == SHACL.NODE_SHAPE) {
-			this.targetShape = NodeShape.getInstance(p, shapeSource, new Cache(), false, shaclSail);
+			this.targetShape = NodeShape.getInstance(p, shapeSource, new Cache(), shaclSail, false);
 		} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-			this.targetShape = PropertyShape.getInstance(p, shapeSource, new Cache(), shaclSail);
+			this.targetShape = PropertyShape.getInstance(p, shapeSource, new Cache(), shaclSail, false);
 		} else {
 			throw new IllegalStateException("Unknown shape type for " + p.getId());
 		}

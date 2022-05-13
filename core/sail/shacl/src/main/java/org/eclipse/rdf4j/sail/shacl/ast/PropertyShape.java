@@ -59,12 +59,12 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 	}
 
 	public static PropertyShape getInstance(ShaclProperties properties, ShapeSource shapeSource, Cache cache,
-			ShaclSail shaclSail) {
+			ShaclSail shaclSail, boolean produceValidationReports) {
 		Shape shape = cache.get(properties.getId());
 		if (shape == null) {
 			shape = new PropertyShape();
 			cache.put(properties.getId(), shape);
-			shape.populate(properties, shapeSource, cache, shaclSail);
+			shape.populate(properties, shapeSource, cache, shaclSail, produceValidationReports);
 		}
 
 		if (shape.constraintComponents.isEmpty()) {
@@ -76,8 +76,8 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 
 	@Override
 	public void populate(ShaclProperties properties, ShapeSource connection,
-			Cache cache, ShaclSail shaclSail) {
-		super.populate(properties, connection, cache, shaclSail);
+			Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
+		super.populate(properties, connection, cache, shaclSail, produceValidationReports);
 
 		this.path = Path.buildPath(connection, properties.getPath());
 
@@ -85,7 +85,8 @@ public class PropertyShape extends Shape implements ConstraintComponent, Identif
 			throw new IllegalStateException(properties.getId() + " is a sh:PropertyShape without a sh:path!");
 		}
 
-		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail);
+		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail,
+				produceValidationReports);
 	}
 
 	@Override

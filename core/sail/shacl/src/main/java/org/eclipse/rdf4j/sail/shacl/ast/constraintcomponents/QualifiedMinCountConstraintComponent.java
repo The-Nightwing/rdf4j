@@ -63,9 +63,9 @@ public class QualifiedMinCountConstraintComponent extends AbstractConstraintComp
 		this.qualifiedMinCount = qualifiedMinCount;
 
 		if (p.getType() == SHACL.NODE_SHAPE) {
-			qualifiedValueShape = NodeShape.getInstance(p, shapeSource, cache, false, shaclSail);
+			qualifiedValueShape = NodeShape.getInstance(p, shapeSource, cache, shaclSail, false);
 		} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-			qualifiedValueShape = PropertyShape.getInstance(p, shapeSource, cache, shaclSail);
+			qualifiedValueShape = PropertyShape.getInstance(p, shapeSource, cache, shaclSail, false);
 		} else {
 			throw new IllegalStateException("Unknown shape type for " + p.getId());
 		}

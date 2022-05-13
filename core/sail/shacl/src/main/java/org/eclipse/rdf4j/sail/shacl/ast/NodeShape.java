@@ -46,13 +46,13 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 	}
 
 	public static NodeShape getInstance(ShaclProperties properties,
-			ShapeSource shapeSource, Cache cache, boolean produceValidationReports, ShaclSail shaclSail) {
+			ShapeSource shapeSource, Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
 
 		Shape shape = cache.get(properties.getId());
 		if (shape == null) {
 			shape = new NodeShape(produceValidationReports);
 			cache.put(properties.getId(), shape);
-			shape.populate(properties, shapeSource, cache, shaclSail);
+			shape.populate(properties, shapeSource, cache, shaclSail, false);
 		}
 
 		return (NodeShape) shape;
@@ -60,8 +60,8 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 
 	@Override
 	public void populate(ShaclProperties properties, ShapeSource connection,
-			Cache cache, ShaclSail shaclSail) {
-		super.populate(properties, connection, cache, shaclSail);
+			Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
+		super.populate(properties, connection, cache, shaclSail, produceValidationReports);
 
 		if (properties.getMinCount() != null) {
 			throw new IllegalStateException("NodeShapes do not support sh:MinCount in " + getId());
@@ -79,7 +79,8 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 		 * Also not supported here is: - sh:lessThan - sh:lessThanOrEquals - sh:qualifiedValueShape
 		 */
 
-		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail);
+		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail,
+				produceValidationReports);
 
 	}
 
@@ -133,8 +134,11 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 				.orElseThrow(IllegalStateException::new);
 
 		if (produceValidationReports) {
-			assert !constraintComponents.isEmpty();
-			if (constraintComponents.size() == 1 && !(constraintComponents.get(0) instanceof PropertyShape)) {
+			// since we split our shapes by constraint component we know that we will only have 1 constraint component
+			// unless we are within a logical operator like sh:not, in which case we don't need to create a validation
+			// report since sh:detail is not supported for sparql based validation
+			assert constraintComponents.size() == 1;
+			if (!(constraintComponents.get(0) instanceof PropertyShape)) {
 				validationQuery = validationQuery.withShape(this);
 				validationQuery = validationQuery.withSeverity(severity);
 				validationQuery.makeCurrentStateValidationReport();
