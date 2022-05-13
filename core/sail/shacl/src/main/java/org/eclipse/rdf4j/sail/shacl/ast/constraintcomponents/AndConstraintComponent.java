@@ -50,9 +50,9 @@ public class AndConstraintComponent extends LogicalOperatorConstraintComponent {
 				.map(r -> new ShaclProperties(r, shapeSource))
 				.map(p -> {
 					if (p.getType() == SHACL.NODE_SHAPE) {
-						return NodeShape.getInstance(p, shapeSource, cache, shaclSail, false);
+						return NodeShape.getInstance(p, shapeSource, cache, shaclSail);
 					} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-						return PropertyShape.getInstance(p, shapeSource, cache, shaclSail, false);
+						return PropertyShape.getInstance(p, shapeSource, cache, shaclSail);
 					}
 					throw new IllegalStateException("Unknown shape type for " + p.getId());
 				})

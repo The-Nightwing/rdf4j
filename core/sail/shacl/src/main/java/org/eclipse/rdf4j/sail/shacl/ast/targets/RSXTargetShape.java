@@ -32,7 +32,6 @@ import org.eclipse.rdf4j.sail.shacl.ast.planNodes.ExternalFilterByQuery;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.PlanNode;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.UnBufferedPlanNode;
 import org.eclipse.rdf4j.sail.shacl.ast.planNodes.Unique;
-import org.eclipse.rdf4j.sail.shacl.ast.planNodes.ValidationTuple;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.ConnectionsGroup;
 import org.eclipse.rdf4j.sail.shacl.wrapper.data.RdfsSubClassOfReasoner;
 import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
@@ -47,9 +46,9 @@ public class RSXTargetShape extends Target {
 		ShaclProperties p = new ShaclProperties(targetShape, shapeSource);
 
 		if (p.getType() == SHACL.NODE_SHAPE) {
-			this.targetShape = NodeShape.getInstance(p, shapeSource, new Cache(), shaclSail, false);
+			this.targetShape = NodeShape.getInstance(p, shapeSource, new Cache(), shaclSail);
 		} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-			this.targetShape = PropertyShape.getInstance(p, shapeSource, new Cache(), shaclSail, false);
+			this.targetShape = PropertyShape.getInstance(p, shapeSource, new Cache(), shaclSail);
 		} else {
 			throw new IllegalStateException("Unknown shape type for " + p.getId());
 		}
@@ -117,7 +116,7 @@ public class RSXTargetShape extends Target {
 
 		// TODO: this is a slow way to solve this problem! We should use bulk operations.
 		return new ExternalFilterByQuery(connectionsGroup.getBaseConnection(), dataGraph, parent, query, variable,
-				ValidationTuple::getActiveTarget).getTrueNode(UnBufferedPlanNode.class);
+				validationTuple -> validationTuple.getActiveTarget()).getTrueNode(UnBufferedPlanNode.class);
 	}
 
 	@Override

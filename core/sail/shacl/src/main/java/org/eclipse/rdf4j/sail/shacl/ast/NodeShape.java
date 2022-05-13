@@ -34,34 +34,30 @@ import org.eclipse.rdf4j.sail.shacl.wrapper.shape.ShapeSource;
 
 public class NodeShape extends Shape implements ConstraintComponent, Identifiable {
 
-	protected boolean produceValidationReports;
-
-	public NodeShape(boolean produceValidationReports) {
-		this.produceValidationReports = produceValidationReports;
+	public NodeShape() {
 	}
 
 	public NodeShape(NodeShape nodeShape) {
 		super(nodeShape);
-		this.produceValidationReports = nodeShape.produceValidationReports;
 	}
 
 	public static NodeShape getInstance(ShaclProperties properties,
-			ShapeSource shapeSource, Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
+			ShapeSource shapeSource, Cache cache, ShaclSail shaclSail) {
 
-		Shape shape = cache.get(properties.getId());
+		NodeShape shape = (NodeShape) cache.get(properties.getId());
 		if (shape == null) {
-			shape = new NodeShape(produceValidationReports);
+			shape = new NodeShape();
 			cache.put(properties.getId(), shape);
-			shape.populate(properties, shapeSource, cache, shaclSail, false);
+			shape.populate(properties, shapeSource, cache, shaclSail);
 		}
 
-		return (NodeShape) shape;
+		return shape;
 	}
 
 	@Override
 	public void populate(ShaclProperties properties, ShapeSource connection,
-			Cache cache, ShaclSail shaclSail, boolean produceValidationReports) {
-		super.populate(properties, connection, cache, shaclSail, produceValidationReports);
+			Cache cache, ShaclSail shaclSail) {
+		super.populate(properties, connection, cache, shaclSail);
 
 		if (properties.getMinCount() != null) {
 			throw new IllegalStateException("NodeShapes do not support sh:MinCount in " + getId());
@@ -79,8 +75,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 		 * Also not supported here is: - sh:lessThan - sh:lessThanOrEquals - sh:qualifiedValueShape
 		 */
 
-		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail,
-				produceValidationReports);
+		constraintComponents = getConstraintComponents(properties, connection, cache, shaclSail);
 
 	}
 
@@ -134,15 +129,12 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 				.orElseThrow(IllegalStateException::new);
 
 		if (produceValidationReports) {
-			// since we split our shapes by constraint component we know that we will only have 1 constraint component
-			// unless we are within a logical operator like sh:not, in which case we don't need to create a validation
-			// report since sh:detail is not supported for sparql based validation
 			assert constraintComponents.size() == 1;
-			if (!(constraintComponents.get(0) instanceof PropertyShape)) {
-				validationQuery = validationQuery.withShape(this);
-				validationQuery = validationQuery.withSeverity(severity);
-				validationQuery.makeCurrentStateValidationReport();
-			}
+			assert !(constraintComponents.get(0) instanceof PropertyShape);
+
+			validationQuery = validationQuery.withShape(this);
+			validationQuery = validationQuery.withSeverity(severity);
+			validationQuery.makeCurrentStateValidationReport();
 		}
 
 		if (scope == Scope.propertyShape) {
@@ -169,7 +161,10 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 					.generateTransactionalValidationPlan(connectionsGroup, validationSettings, overrideTargetNode,
 							Scope.nodeShape);
 
-			if (!(constraintComponent instanceof PropertyShape) && produceValidationReports) {
+			if (produceValidationReports) {
+				assert !(constraintComponent instanceof PropertyShape);
+				assert constraintComponents.size() == 1;
+
 				validationPlanNode = new ValidationReportNode(validationPlanNode, t -> {
 					return new ValidationResult(t.getActiveTarget(), t.getActiveTarget(), this,
 							constraintComponent.getConstraintComponent(), getSeverity(), t.getScope(), t.getContexts(),
@@ -181,8 +176,7 @@ public class NodeShape extends Shape implements ConstraintComponent, Identifiabl
 				validationPlanNode = Unique.getInstance(new ShiftToPropertyShape(validationPlanNode), true);
 			}
 
-			union = UnionNode.getInstance(union,
-					validationPlanNode);
+			union = UnionNode.getInstance(union, validationPlanNode);
 		}
 
 		return union;

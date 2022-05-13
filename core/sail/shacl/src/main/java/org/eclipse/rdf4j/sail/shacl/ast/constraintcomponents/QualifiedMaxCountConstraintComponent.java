@@ -60,9 +60,9 @@ public class QualifiedMaxCountConstraintComponent extends AbstractConstraintComp
 		this.qualifiedMaxCount = qualifiedMaxCount;
 
 		if (p.getType() == SHACL.NODE_SHAPE) {
-			qualifiedValueShape = NodeShape.getInstance(p, shapeSource, cache, shaclSail, false);
+			qualifiedValueShape = NodeShape.getInstance(p, shapeSource, cache, shaclSail);
 		} else if (p.getType() == SHACL.PROPERTY_SHAPE) {
-			qualifiedValueShape = PropertyShape.getInstance(p, shapeSource, cache, shaclSail, false);
+			qualifiedValueShape = PropertyShape.getInstance(p, shapeSource, cache, shaclSail);
 		} else {
 			throw new IllegalStateException("Unknown shape type for " + p.getId());
 		}
